@@ -1,103 +1,480 @@
-import Image from "next/image";
+"use client"
+
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import { useEffect, useState } from "react";
+
+const PROGRAM_ID = new PublicKey("AZU5xiTxwuTbp5ixiN7mxoGVy6BCzhFEJFpCSvyffowc");
+
+const IDL = {
+  "address": "AZU5xiTxwuTbp5ixiN7mxoGVy6BCzhFEJFpCSvyffowc",
+  "metadata": {
+    "name": "notes_dapp",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_note",
+      "discriminator": [
+        103,
+        2,
+        208,
+        242,
+        86,
+        156,
+        151,
+        107
+      ],
+      "accounts": [
+        {
+          "name": "note",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "author"
+              },
+              {
+                "kind": "arg",
+                "path": "title"
+              }
+            ]
+          }
+        },
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_note",
+      "discriminator": [
+        182,
+        211,
+        115,
+        229,
+        163,
+        88,
+        108,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "note",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "author"
+              },
+              {
+                "kind": "account",
+                "path": "note.title",
+                "account": "Note"
+              }
+            ]
+          }
+        },
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_note",
+      "discriminator": [
+        103,
+        129,
+        251,
+        34,
+        33,
+        154,
+        210,
+        148
+      ],
+      "accounts": [
+        {
+          "name": "note",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "author"
+              },
+              {
+                "kind": "account",
+                "path": "note.title",
+                "account": "Note"
+              }
+            ]
+          }
+        },
+        {
+          "name": "author",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Note",
+      "discriminator": [
+        203,
+        75,
+        252,
+        196,
+        81,
+        210,
+        122,
+        126
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "TitleTooLong",
+      "msg": "Title cannot be longer than 100 chars"
+    },
+    {
+      "code": 6001,
+      "name": "ContentTooLong",
+      "msg": "Content cannot be longer than 1000 chars"
+    },
+    {
+      "code": 6002,
+      "name": "TitleEmpty",
+      "msg": "Title cannot be empty"
+    },
+    {
+      "code": 6003,
+      "name": "ContentEmpty",
+      "msg": "Content cannot be empty"
+    },
+    {
+      "code": 6004,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    }
+  ],
+  "types": [
+    {
+      "name": "Note",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_updated",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const {connection} = useConnection();
+  const wallet = useWallet();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const [notes,setNotes] = useState<any[]>([]);
+  const [loading,setLoading] = useState(false);
+  const [message,setMessage] = useState("");
+
+  const [title,setTitle] = useState("");
+  const [content,setContent] = useState("");
+
+  const [editContent,setEditContent] = useState("")
+  const [editNote,setEditNote] = useState<any>(null);
+
+
+  const getProgram = ()=>{
+    if(!wallet.publicKey || !wallet.signTransaction) return null;
+    const provider = new AnchorProvider(connection, wallet as any, AnchorProvider.defaultOptions());
+    const program = new Program(IDL as any, provider);
+    return program;
+  }
+
+  const getNoteAddress = (title: String)=>{
+    if(!wallet.publicKey || !wallet.signTransaction) return null;
+    const [noteAddress] = PublicKey.findProgramAddressSync([Buffer.from("note"),wallet.publicKey.toBuffer(),Buffer.from(title)],PROGRAM_ID)
+    return noteAddress;
+  }
+
+  // Functions to be created : 
+
+  // load the notes 
+  const loadNotes = async ()=>{
+    if (!wallet.publicKey) return;
+    setLoading(true);
+    try {
+      let program = getProgram()
+      if(!program) return;
+      const notes = await (program.account as any).note.all([
+        {
+          memcmp: {
+            offset: 8, // discriminato r size
+            bytes: wallet.publicKey.toBase58()
+          }
+        }
+      ]);
+    
+      console.log("User's notes:", notes);
+      setNotes(notes);
+      setMessage("")
+    } catch (error) {
+      console.log("Error Loading notes", error);
+      setMessage("Error Loading the notes");
+    }
+    setLoading(false);
+  }
+
+  // create the notes 
+
+  const createNote = async ()=>{
+    if(!title.trim() || !content.trim()){
+      setMessage("Please fill in the title or content");
+      return;
+    }
+    if(title.length>100){
+      setMessage("Title too long. Maximum length = 100 characters.");
+      return;
+    }
+    if(content.length>1000){
+      setMessage("Content too long. Maximum length = 1000 characters");
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const program = getProgram();
+      if(!program) return;
+
+      if(!wallet.publicKey) {
+        setMessage("Wallet not connected");
+        setLoading(false);
+        return;
+      }
+
+      const noteAddress = getNoteAddress(title);
+      if(!noteAddress) return
+
+      await program.methods.createNote(title, content)
+        .accounts({
+          note: noteAddress,
+          author: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      setMessage("Note created successfully");
+      setTitle("")
+      setContent("")
+      await loadNotes();
+
+    } catch (error) {
+      console.log("Error creating note, Error:",error);
+      setMessage("Error creating note");
+    }
+    setLoading(false)
+  }
+
+  // update the notes 
+
+  const updateNote = async (note:any)=>{
+    if(!editContent.trim()) return;
+    if(editContent.length>1000) return;
+    setLoading(true)
+    try {
+      const program = getProgram();
+      if(!program) return;
+      if(!wallet.publicKey) return;
+      const noteAddress = getNoteAddress(note.account.title);
+
+      if(!noteAddress) return;
+
+      await program.methods.updateNote(editContent).accounts({
+        note:noteAddress,
+        author:wallet.publicKey
+      }).rpc()
+
+      setMessage("successfully updated note");
+      setEditContent("")
+      setEditNote(null)
+
+      await loadNotes()
+      
+    } catch (error) {
+      console.log("Error while updating note, Error : ", error);
+      setMessage("Error updating note");
+    }
+    setLoading(false)
+  }
+
+  // delete the notes
+  
+  const deleteNote = async (note:any)=>{
+    setLoading(true);
+    try {
+      const program = getProgram()
+      if(!program) return
+      if(!wallet.publicKey) return
+      const noteAddress = getNoteAddress(note.account.title);
+      if(!noteAddress) return
+
+      await program.methods.deleteNote().accounts({
+        note:noteAddress,
+        author:wallet.publicKey
+      }).rpc()
+
+      setMessage("Note deleted successfully")
+      await loadNotes();
+    } catch (error) {
+      console.log("Error deleting note, Error : ",error);
+      setMessage("Error deleting this note")
+    }
+    setLoading(false);
+  }
+
+  useEffect(()=>{
+    if(wallet.connected)
+      loadNotes()
+  },[wallet.connected])
+
+  
+
+  if(!wallet.connected){
+    return <div className="text-gray-700">Please Connect Wallet</div>
+  }
+
+  return <div className="text-gray-900">
+    <div>
+      <h2 className="text-3xl mb-6">
+        Create New Note
+      </h2>
+      <div>
+        <label className="text-2xl block font-medium" htmlFor="title">Title <span className="text-sm">({title.length}/100)</span></label>
+        <input type="text" name="title" id="title" value={title} onChange={(e)=>{
+          setTitle(e.target.value)
+        }} className="border-2 border-black p-1 w-full" placeholder="Enter Title:" />
+      </div>
+      <div>
+        <label className="text-2xl block font-medium" htmlFor="content">Content <span className="text-sm">({title.length}/1000)</span></label>
+        <textarea maxLength={1000} rows={5} name="content" id="content" value={content} onChange={(e)=>{
+          setContent(e.target.value)
+        }} className="border-2 border-black p-1 h-32 w-full" placeholder="Enter Content:" />
+      </div>
+      <button disabled={loading || !title.trim() || !content.trim()} className="bg-blue-800 w-full rounded-4xl text-amber-50 py-2 mx-auto font-extrabold disabled:bg-blue-300 disabled:cursor-not-allowed hover:cursor-grab" onClick={createNote}>{loading? "Creating Note":"Create Note"}</button>
     </div>
-  );
+    <div>
+      {notes?.map((note:any)=>{
+        return <div>
+          <div className="mb-6 mt-6 border-2 border-gray-500 rounded-2xl p-3 " key={note.account.author}>
+            <h3 className="text-xl font-bold">{note.account.title}</h3>
+            <p className="">{note.account.content}</p>
+            <div>Created At: {new Date(note.account.createdAt.toNumber()).toLocaleString()}</div>
+            <div>Last Updated at: {new Date(note.account.lastUpdated.toNumber()).toLocaleString()}</div>
+
+            {editNote?(
+              <div>
+                <textarea maxLength={1000} rows={5} name="update_content" id="update_content" value={editContent} onChange={(e)=>{
+                setEditContent(e.target.value)
+                }} className="border-2 border-black p-1 h-32 w-full" placeholder="Enter Updated Content:" />
+              </div>
+            ):null}
+
+            <div className="flex gap-4 p-2">
+              <button className="border-2 p-2 rounded-sm hover:bg-violet-800 hover:text-amber-50 hover:cursor-auto" onClick={()=>{
+                if(!editNote){
+                  setEditNote(note);
+                  setEditContent(note.account.content)
+                }else{
+                  updateNote(note)
+                }
+              }}>{editNote?"Save":"Edit"}</button>
+              <button className="border-2 p-2 rounded-sm hover:bg-violet-800 hover:text-amber-50 hover:cursor-auto" onClick={()=>deleteNote(note)}>Delete</button>
+              {editNote?(
+                <button className="border-2 p-2 rounded-sm hover:bg-violet-800 hover:text-amber-50 hover:cursor-auto" onClick={()=>setEditNote(null)}>Close</button>
+              ):null}
+            </div>
+          </div>
+        </div>
+      })}
+    </div>
+  </div>
 }
