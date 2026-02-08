@@ -434,7 +434,7 @@ export default function Home() {
         }} className="border-2 border-black p-1 w-full" placeholder="Enter Title:" />
       </div>
       <div>
-        <label className="text-2xl block font-medium" htmlFor="content">Content <span className="text-sm">({title.length}/1000)</span></label>
+        <label className="text-2xl block font-medium" htmlFor="content">Content <span className="text-sm">({content.length}/1000)</span></label>
         <textarea maxLength={1000} rows={5} name="content" id="content" value={content} onChange={(e)=>{
           setContent(e.target.value)
         }} className="border-2 border-black p-1 h-32 w-full" placeholder="Enter Content:" />
