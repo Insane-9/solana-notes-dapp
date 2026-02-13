@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 🚀 Live Demo
+
+**Deployment Link:** [https://solana-notes-dapp-soham13anerjees-projects.vercel.app/]
+
+
 ## Getting Started
 
 First, run the development server:
