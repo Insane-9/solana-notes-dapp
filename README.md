@@ -4,8 +4,6 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 **Deployment Link:** [https://solana-notes-dapp-soham13anerjees-projects.vercel.app/]
 
---
-
 **Backend logic in Anchor for Solana:** https://github.com/Insane-9/Notes-DApp-Anchor-contract
 
 
